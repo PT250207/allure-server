@@ -97,18 +97,6 @@ tolerations: [ ]
 
 affinity: { }
 
-## Secret object name to use 'env.secret' map
-## Secrets must be added manually to the namespace
-## Uncomment and remove '{ }' if need
-## OPTIONAL
-secret:
-  ## name: allure-server-env-var-secret
-  ## Env variables from secret with name from 'secret.name'
-  ## OPTIONAL
-  keys:
-    - SPRING_DATASOURCE_USERNAME
-    - SPRING_DATASOURCE_PASSWORD
-
 ## Allure filesystem storage in PVC
 ## enable/disable by 'pvc.enabled'
 pvc:
@@ -135,19 +123,48 @@ databaseCrt:
     sourcePath: "crt/CA.pem"
     ## Mount crt to this dir in container
     targetDir: "~/.postgresql/"
+  
+## Internal postgresql deployment, if disabled the env vars to use an external postgres server must be set
+postgresql:
+  enabled: true
+  image:
+    repository: bitnami/postgresql
+    tag: 14.2.0-debian-10-r9
+  auth:
+    username: admin
+    password: admin
+    database: allure
+  primary:
+    service:
+      type: ClusterIP
+      ports:
+        postgresql: 5432
+    persistence:
+      size: 32Gi
 
 env:
   ## Add custom env variables
   ## OPTIONAL
   SPRING_PROFILES_ACTIVE: default
 
-  ##################
-  ## FOR Postgres ##
-  ##################
-  SPRING_DATASOURCE_URL: jdbc:postgresql://rc1b-olr3c3p38mxdsm0f.mdb.yandexcloud.net:6432/allure?&targetServerType=master&useSSL=false
-  SPRING_JPA_DATABASE: postgresql
-  SPRING_JPA_HIBERNATE_DDL-AUTO: update
-
+  ###############################################################
+  ## For external Postgres server, if postgresql.enabled=false ##
+  ###############################################################
+  ## SPRING_DATASOURCE_URL: jdbc:postgresql://<external-postgres-host>:5432/allure
+  ## SPRING_JPA_DATABASE: postgresql
+  ## SPRING_JPA_HIBERNATE_DDL_AUTO: update
   ## Use 'secret.keys' instead this
-  #SPRING_DATASOURCE_USERNAME: <your_username>
-  #SPRING_DATASOURCE_PASSWORD: <your_password>
+  ## SPRING_DATASOURCE_USERNAME: <your_username>
+  ## SPRING_DATASOURCE_PASSWORD: <your_password>
+
+## Secret object name to use 'env.secret' map
+## Secrets must be added manually to the namespace
+## Uncomment and remove '{ }' if need
+## OPTIONAL
+## secret:
+  ## name: allure-server-env-var-secret
+  ## Env variables from secret with name from 'secret.name'
+  ## OPTIONAL
+  ## keys:
+  ##   - SPRING_DATASOURCE_USERNAME
+  ##   - SPRING_DATASOURCE_PASSWORD
