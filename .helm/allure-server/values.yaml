@@ -43,38 +43,40 @@ service:
 
 ## Ingress for load balancer
 ingress:
-  enabled: true
+  enabled: false
+
+  className: ""
   ## Labels -> key: value
-  labels: { }
-  ## Ingress annotations
-  annotations:
-    acme.cert-manager.io/http01-edit-in-place: "true"
-    kubernetes.io/ingress.class: nginx
-    ## deprecated
-    nginx.ingress.kubernetes.io/proxy-body-size: "100m"
-    ## deprecated
-    nginx.ingress.kubernetes.io/client-max-body-size: "100m"
-    ## new https://docs.nginx.com/nginx-ingress-controller/configuration/ingress-resources/advanced-configuration-with-annotations/
-    nginx.org/client-max-body-size: "100m"
-    ## LetsEncrypt Issuer by CertManager annotation. USE YOUR OWN or disable TLS (https)
-    ## MY issuer
-    cert-manager.io/cluster-issuer: letsencrypt-prod
+  labels: {}
+  
+  ## Examplof of some ingress annotations
+  ## annotations:
+  ##   acme.cert-manager.io/http01-edit-in-place: "true"
+  ##   kubernetes.io/ingress.class: nginx
+  ##   new https://docs.nginx.com/nginx-ingress-controller/configuration/ingress-resources/advanced-configuration-with-annotations/
+  ##   nginx.org/client-max-body-size: "100m"
+  ##   LetsEncrypt Issuer by CertManager annotation. USE YOUR OWN or disable TLS (https)
+  ##   cert-manager.io/cluster-issuer: letsencrypt-prod
+
   ## If TLS is set to true, you must declare what secret will store the key/certificate for TLS
-  tls:
-    - hosts:
-        - "allure.iopump.ru"
-        - "iopump.ru"
-      ## Must be provided if Ingress is enabled
-      ## Secrets must be added manually to the namespace
-      ## MY secret
-      secretName: letsencrypt-prod
-  ## Ingress hostnames and service paths
-  hosts:
-    - name: allure.iopump.ru
-      path: /
-    - name: iopump.ru
-      path: /
-  extraPaths: { }
+  ## tls:
+  ## - hosts:
+  ##     - "allure.iopump.ru"
+  ##     - "iopump.ru"
+  ## Must be provided if Ingress is enabled
+  ## Secrets must be added manually to the namespace
+  ##   secretName: letsencrypt-prod
+
+  ## Example of ingress hostnames and service paths
+  ## hosts:
+  ## - name: allure.iopump.ru
+  ##   pathType: Prefix
+  ##   path: /
+  ## - name: iopump.ru
+  ##   pathType: Prefix
+  ##   path: /
+
+  extraPaths: {}
 
 resources:
   limits:
