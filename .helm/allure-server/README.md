@@ -9,6 +9,10 @@ Helm chart to deploy Allure Server to Kubernetes.
 
 [allure-server chart](../allure-server)
 
+### Required commands for internal Postgres Server use
+- `helm dependency update`
+  Update the chart dependencies in order to bitnami/postgresql chart be also deployed
+
 ### Execute commands
 
 - `helm delete allure-server -n allure-production`  
