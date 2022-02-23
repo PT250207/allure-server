@@ -103,16 +103,12 @@ affinity: { }
 ## enable/disable by 'pvc.enabled'
 pvc:
   enabled: true
-  spec:
-    ## My storage Class Name
-    storageClassName: yc-network-hdd
-    accessModes:
-      - ReadWriteOnce
-    resources:
-      requests:
-        storage: 1Gi
-    ## Static PV
-    #volumeName: allure-storage-pv
+  annotations: {}
+  ## Set .storageClassName if it's to use the non-default one
+  ## storageClassName: <other-sc-name>
+  accessModes: [ ReadWriteOnce ]
+  size: 1Gi
+  selectorLabels: {}
 
 ## Add cert for connection to database
 ## enable/disable by 'databaseCrt.enabled'
