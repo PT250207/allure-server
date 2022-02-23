@@ -62,6 +62,7 @@ Create the name of the service account to use
 {{- end }}
 
 {{- define "helpers.list-secret-env-variables"}}
+{{- if .Values.secret }}
 {{- $name := default "allure-server-env-var-secret" .Values.secret.name }}
 {{- range $key := .Values.secret.keys }}
 - name: {{ $key }}
@@ -69,6 +70,7 @@ Create the name of the service account to use
     secretKeyRef:
       name:  {{ $name }}
       key: {{ $key }}
+{{- end }}
 {{- end }}
 {{- end }}
 

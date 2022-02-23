@@ -1,8 +1,28 @@
-{{- if .Values.pvc.enabled -}}
+{{- if .Values.pvc.enabled }}
+
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
   name: allure-server-storagepvc
+  {{- with .Values.pvc.annotations }}
+  annotations:
+    {{- toYaml .Values.pvc.annotations | nindent 4 }}
+  {{- end }}
 spec:
-  {{- toYaml .Values.pvc.spec | nindent 2 }}
-  {{ end }}
+  {{- if .Values.pvc.storageClassName }}
+  storageClassName: {{ .Values.pvc.storageClassName }}
+  {{- end }}
+  accessModes:
+  {{- range .Values.pvc.accessModes }}
+    - {{ . | quote }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.pvc.size | quote }}
+  {{- with .Values.pvc.selectorLabels }}
+  selector:
+    matchLabels:
+      {{- toYaml . | nindent 6 }}
+  {{- end }}
+
+{{- end }}

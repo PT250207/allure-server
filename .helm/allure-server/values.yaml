@@ -43,38 +43,40 @@ service:
 
 ## Ingress for load balancer
 ingress:
-  enabled: true
+  enabled: false
+
+  className: ""
   ## Labels -> key: value
-  labels: { }
-  ## Ingress annotations
-  annotations:
-    acme.cert-manager.io/http01-edit-in-place: "true"
-    kubernetes.io/ingress.class: nginx
-    ## deprecated
-    nginx.ingress.kubernetes.io/proxy-body-size: "100m"
-    ## deprecated
-    nginx.ingress.kubernetes.io/client-max-body-size: "100m"
-    ## new https://docs.nginx.com/nginx-ingress-controller/configuration/ingress-resources/advanced-configuration-with-annotations/
-    nginx.org/client-max-body-size: "100m"
-    ## LetsEncrypt Issuer by CertManager annotation. USE YOUR OWN or disable TLS (https)
-    ## MY issuer
-    cert-manager.io/cluster-issuer: letsencrypt-prod
+  labels: {}
+  
+  ## Examplof of some ingress annotations
+  ## annotations:
+  ##   acme.cert-manager.io/http01-edit-in-place: "true"
+  ##   kubernetes.io/ingress.class: nginx
+  ##   new https://docs.nginx.com/nginx-ingress-controller/configuration/ingress-resources/advanced-configuration-with-annotations/
+  ##   nginx.org/client-max-body-size: "100m"
+  ##   LetsEncrypt Issuer by CertManager annotation. USE YOUR OWN or disable TLS (https)
+  ##   cert-manager.io/cluster-issuer: letsencrypt-prod
+
   ## If TLS is set to true, you must declare what secret will store the key/certificate for TLS
-  tls:
-    - hosts:
-        - "allure.iopump.ru"
-        - "iopump.ru"
-      ## Must be provided if Ingress is enabled
-      ## Secrets must be added manually to the namespace
-      ## MY secret
-      secretName: letsencrypt-prod
-  ## Ingress hostnames and service paths
-  hosts:
-    - name: allure.iopump.ru
-      path: /
-    - name: iopump.ru
-      path: /
-  extraPaths: { }
+  ## tls:
+  ## - hosts:
+  ##     - "allure.iopump.ru"
+  ##     - "iopump.ru"
+  ## Must be provided if Ingress is enabled
+  ## Secrets must be added manually to the namespace
+  ##   secretName: letsencrypt-prod
+
+  ## Example of ingress hostnames and service paths
+  ## hosts:
+  ## - name: allure.iopump.ru
+  ##   pathType: Prefix
+  ##   path: /
+  ## - name: iopump.ru
+  ##   pathType: Prefix
+  ##   path: /
+
+  extraPaths: {}
 
 resources:
   limits:
@@ -97,32 +99,16 @@ tolerations: [ ]
 
 affinity: { }
 
-## Secret object name to use 'env.secret' map
-## Secrets must be added manually to the namespace
-## Uncomment and remove '{ }' if need
-## OPTIONAL
-secret:
-  ## name: allure-server-env-var-secret
-  ## Env variables from secret with name from 'secret.name'
-  ## OPTIONAL
-  keys:
-    - SPRING_DATASOURCE_USERNAME
-    - SPRING_DATASOURCE_PASSWORD
-
 ## Allure filesystem storage in PVC
 ## enable/disable by 'pvc.enabled'
 pvc:
   enabled: true
-  spec:
-    ## My storage Class Name
-    storageClassName: yc-network-hdd
-    accessModes:
-      - ReadWriteOnce
-    resources:
-      requests:
-        storage: 1Gi
-    ## Static PV
-    #volumeName: allure-storage-pv
+  annotations: {}
+  ## Set .storageClassName if it's to use the non-default one
+  ## storageClassName: <other-sc-name>
+  accessModes: [ ReadWriteOnce ]
+  size: 1Gi
+  selectorLabels: {}
 
 ## Add cert for connection to database
 ## enable/disable by 'databaseCrt.enabled'
@@ -135,19 +121,48 @@ databaseCrt:
     sourcePath: "crt/CA.pem"
     ## Mount crt to this dir in container
     targetDir: "~/.postgresql/"
+  
+## Internal postgresql deployment, if disabled the env vars to use an external postgres server must be set
+postgresql:
+  enabled: true
+  image:
+    repository: bitnami/postgresql
+    tag: 14.2.0-debian-10-r9
+  auth:
+    username: admin
+    password: admin
+    database: allure
+  primary:
+    service:
+      type: ClusterIP
+      ports:
+        postgresql: 5432
+    persistence:
+      size: 32Gi
 
 env:
   ## Add custom env variables
   ## OPTIONAL
   SPRING_PROFILES_ACTIVE: default
 
-  ##################
-  ## FOR Postgres ##
-  ##################
-  SPRING_DATASOURCE_URL: jdbc:postgresql://rc1b-olr3c3p38mxdsm0f.mdb.yandexcloud.net:6432/allure?&targetServerType=master&useSSL=false
-  SPRING_JPA_DATABASE: postgresql
-  SPRING_JPA_HIBERNATE_DDL-AUTO: update
-
+  ###############################################################
+  ## For external Postgres server, if postgresql.enabled=false ##
+  ###############################################################
+  ## SPRING_DATASOURCE_URL: jdbc:postgresql://<external-postgres-host>:5432/allure
+  ## SPRING_JPA_DATABASE: postgresql
+  ## SPRING_JPA_HIBERNATE_DDL_AUTO: update
   ## Use 'secret.keys' instead this
-  #SPRING_DATASOURCE_USERNAME: <your_username>
-  #SPRING_DATASOURCE_PASSWORD: <your_password>
+  ## SPRING_DATASOURCE_USERNAME: <your_username>
+  ## SPRING_DATASOURCE_PASSWORD: <your_password>
+
+## Secret object name to use 'env.secret' map
+## Secrets must be added manually to the namespace
+## Uncomment and remove '{ }' if need
+## OPTIONAL
+## secret:
+  ## name: allure-server-env-var-secret
+  ## Env variables from secret with name from 'secret.name'
+  ## OPTIONAL
+  ## keys:
+  ##   - SPRING_DATASOURCE_USERNAME
+  ##   - SPRING_DATASOURCE_PASSWORD
