@@ -31,15 +31,27 @@ spec:
         - name: {{ .Chart.Name }}
           securityContext:
           {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
-          {{- include "helpers.list-env-variables" . | indent 12 }}
-          {{- include "helpers.list-secret-env-variables" . | indent 12 }}
+          {{- if .Values.postgresql.enabled }}
+          - name: SPRING_DATASOURCE_URL
+            value: jdbc:postgresql://{{ .Release.Name }}-postgresql:5432/{{ .Values.postgresql.auth.database }}
+          - name: SPRING_JPA_DATABASE
+            value: postgresql
+          - name: SPRING_DATASOURCE_USERNAME
+            value: {{ .Values.postgresql.auth.username }}
+          - name: SPRING_DATASOURCE_PASSWORD
+            value: {{ .Values.postgresql.auth.password }}
+          - name: SPRING_JPA_HIBERNATE_DDL_AUTO
+            value: update
+          {{- end }}
+          {{- include "helpers.list-env-variables" . | indent 10 }}
+          {{- include "helpers.list-secret-env-variables" . | indent 10 }}
           ports:
-            - name: http
-              containerPort: 8080
-              protocol: TCP
+          - name: http
+            containerPort: 8080
+            protocol: TCP
           startupProbe:
             httpGet:
               path: /api/result
