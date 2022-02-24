@@ -1,0 +1,44 @@
+{{- if .Values.ingress.enabled }}
+{{- if .Values.ingress.istio.useVirtualService }}
+
+{{- $serviceName := "allure-server-service" -}}
+{{- $servicePort := .Values.service.port -}}
+
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: allure-server
+spec:
+  hosts: [ "*" ]
+  gateways: [ {{ .Values.ingress.istio.gatewayName }} ]
+  http:
+  - match:
+    {{- if or (eq (tpl .Values.ingress.path .) "/") (eq (tpl .Values.ingress.path .) "/*") }}
+    - uri:
+        prefix: /
+    - uri:
+        prefix: /ui
+    {{- else }}
+    - uri:
+        {{- if mustRegexMatch "^.+/\\*$" (tpl .Values.ingress.path .) }}
+        prefix: {{ mustRegexReplaceAll "^(.+)/\\*$" (tpl .Values.ingress.path .) "$1" }}
+        {{- else if mustRegexMatch "^.+\\*$" (tpl .Values.ingress.path .) }}
+        prefix: {{ mustRegexReplaceAll "^(.+)\\*$" (tpl .Values.ingress.path .) "$1" }}
+        {{- else }}
+        prefix: {{ tpl .Values.ingress.path . }}
+        {{- end }}
+    {{- end }}
+    - uri:
+        prefix: /VAADIN
+    - uri:
+        prefix: /swagger
+    - uri:
+        prefix: /v3/api-docs
+    route:
+    - destination:
+        host: {{ $serviceName }}
+        port:
+          number: {{ $servicePort }}
+
+{{- end }}
+{{- end }}

@@ -1,10 +1,11 @@
 {{- if .Values.ingress.enabled }}
+{{- if not .Values.ingress.istio.useVirtualService }}
 
 {{- $serviceName := "allure-server-service" -}}
-{{- $servicePort := "http" -}}
-{{- $ingressPath := .Values.ingress.path -}}
+{{- $servicePort := .Values.service.port -}}
 {{- $ingressPathType := .Values.ingress.pathType -}}
-{{- $extraPaths := .Values.ingress.extraPaths -}}
+{{- $ingressPath := (tpl .Values.ingress.path . ) -}}
+{{- $extraPaths := (tpl .Values.ingress.extraPaths .) -}}
 
 ---
 
@@ -55,7 +56,7 @@ spec:
               service:
                 name: {{ $serviceName }}
                 port:
-                  name: {{ $servicePort }}
+                  number: {{ $servicePort }}
               {{- else }}
               serviceName: {{ $serviceName }}
               servicePort: {{ $servicePort }}
@@ -69,7 +70,7 @@ spec:
               service:
                 name: {{ $serviceName }}
                 port:
-                  name: {{ $servicePort }}
+                  number: {{ $servicePort }}
               {{- else }}
               serviceName: {{ $serviceName }}
               servicePort: {{ $servicePort }}
@@ -82,4 +83,5 @@ spec:
             {{- end }}
   {{- end -}}
 
+  {{- end -}}
   {{- end -}}

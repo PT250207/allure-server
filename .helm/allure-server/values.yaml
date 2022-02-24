@@ -44,6 +44,12 @@ service:
 ingress:
   enabled: true
 
+  ## To use/deploy the Istio VirtualService is required that Istio be deployed on the cluster with at least one Gateway configured
+  ## Kubernetes CustomResrouceDefnition "virtualservices.networking.istio.io" should also be present on the cluster
+  istio:
+    useVirtualService: false
+    gatewayName: istio-system/istio-gateway  ## <namespace>/<gateway-name> format
+
   # For Kubernetes >= 1.19 you should specify the ingress-controller via the field ingressClassName
   # See https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/#specifying-the-class-of-an-ingress
   # ingressClassName: nginx
@@ -55,7 +61,7 @@ ingress:
   # hosts:
   # - address.example.com
 
-  path: /*
+  path: /{{ .Release.Namespace }}/allure
   ## pathType is only for k8s >= 1.19
   pathType: ImplementationSpecific
 
