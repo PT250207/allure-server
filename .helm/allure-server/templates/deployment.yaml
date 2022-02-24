@@ -56,20 +56,20 @@ spec:
             httpGet:
               path: /api/result
               port: http
-            initialDelaySeconds: 30
-            periodSeconds: 10
+            initialDelaySeconds: 25
+            periodSeconds: 5
           livenessProbe:
             httpGet:
               path: /api/result
               port: http
-            initialDelaySeconds: 30
-            periodSeconds: 30
+            initialDelaySeconds: 25
+            periodSeconds: 5
           readinessProbe:
             httpGet:
               path: /api/result
               port: http
-            initialDelaySeconds: 30
-            periodSeconds: 30
+            initialDelaySeconds: 5
+            periodSeconds: 5
           resources:
           {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
