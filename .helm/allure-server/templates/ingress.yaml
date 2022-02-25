@@ -1,9 +1,10 @@
 {{- if .Values.ingress.enabled }}
+{{- if not .Values.ingress.istio.useVirtualService }}
 
 {{- $serviceName := "allure-server-service" -}}
-{{- $servicePort := "http" -}}
-{{- $ingressPath := .Values.ingress.path -}}
+{{- $servicePort := .Values.service.port -}}
 {{- $ingressPathType := .Values.ingress.pathType -}}
+{{- $ingressPath := (tpl .Values.ingress.path . ) -}}
 {{- $extraPaths := .Values.ingress.extraPaths -}}
 
 ---
@@ -43,23 +44,67 @@ spec:
     - host: {{ tpl . $}}
       http:
         paths:
-          {{- if $extraPaths }}
-          {{- toYaml $extraPaths | nindent 10 }}
-          {{- end }}
-          - path: {{ $ingressPath }}
+          - backend:
+              {{- if $apiV1 }}
+              service:
+                name: {{ $serviceName }}
+                port:
+                  number: {{ $servicePort }}
+              {{- else }}
+              serviceName: {{ $serviceName }}
+              servicePort: {{ $servicePort }}
+              {{- end }}
+            {{- if $ingressPath }}
+            path: {{ (tpl $ingressPath . ) }}
+            {{- end }}
             {{- if $apiV1 }}
             pathType: {{ $ingressPathType }}
             {{- end }}
+          - path: /VAADIN
+            {{- if $apiV1 }}
+            pathType: {{ $ingressPathType }}
+            {{- end }}          
             backend:
               {{- if $apiV1 }}
               service:
                 name: {{ $serviceName }}
                 port:
-                  name: {{ $servicePort }}
+                  number: {{ $servicePort }}
               {{- else }}
               serviceName: {{ $serviceName }}
               servicePort: {{ $servicePort }}
               {{- end }}
+          - path: /swagger
+            {{- if $apiV1 }}
+            pathType: {{ $ingressPathType }}
+            {{- end }}          
+            backend:
+              {{- if $apiV1 }}
+              service:
+                name: {{ $serviceName }}
+                port:
+                  number: {{ $servicePort }}
+              {{- else }}
+              serviceName: {{ $serviceName }}
+              servicePort: {{ $servicePort }}
+              {{- end }}
+          - path: /v3/api-docs
+            {{- if $apiV1 }}
+            pathType: {{ $ingressPathType }}
+            {{- end }}          
+            backend:
+              {{- if $apiV1 }}
+              service:
+                name: {{ $serviceName }}
+                port:
+                  number: {{ $servicePort }}
+              {{- else }}
+              serviceName: {{ $serviceName }}
+              servicePort: {{ $servicePort }}
+              {{- end }}
+          {{- if $extraPaths }}
+          {{- toYaml (tpl $extraPaths .) | nindent 10 }}
+          {{- end }}
   {{- end }}
   {{- else }}
     - http:
@@ -69,17 +114,63 @@ spec:
               service:
                 name: {{ $serviceName }}
                 port:
-                  name: {{ $servicePort }}
+                  number: {{ $servicePort }}
               {{- else }}
               serviceName: {{ $serviceName }}
               servicePort: {{ $servicePort }}
               {{- end }}
             {{- if $ingressPath }}
-            path: {{ $ingressPath }}
+            path: {{ (tpl $ingressPath . ) }}
             {{- end }}
             {{- if $apiV1 }}
             pathType: {{ $ingressPathType }}
             {{- end }}
+          - path: /VAADIN
+            {{- if $apiV1 }}
+            pathType: {{ $ingressPathType }}
+            {{- end }}          
+            backend:
+              {{- if $apiV1 }}
+              service:
+                name: {{ $serviceName }}
+                port:
+                  number: {{ $servicePort }}
+              {{- else }}
+              serviceName: {{ $serviceName }}
+              servicePort: {{ $servicePort }}
+              {{- end }}
+          - path: /swagger
+            {{- if $apiV1 }}
+            pathType: {{ $ingressPathType }}
+            {{- end }}          
+            backend:
+              {{- if $apiV1 }}
+              service:
+                name: {{ $serviceName }}
+                port:
+                  number: {{ $servicePort }}
+              {{- else }}
+              serviceName: {{ $serviceName }}
+              servicePort: {{ $servicePort }}
+              {{- end }}
+          - path: /v3/api-docs
+            {{- if $apiV1 }}
+            pathType: {{ $ingressPathType }}
+            {{- end }}          
+            backend:
+              {{- if $apiV1 }}
+              service:
+                name: {{ $serviceName }}
+                port:
+                  number: {{ $servicePort }}
+              {{- else }}
+              serviceName: {{ $serviceName }}
+              servicePort: {{ $servicePort }}
+              {{- end }}
+          {{- if $extraPaths }}
+          {{- toYaml (tpl $extraPaths .) | nindent 10 }}
+          {{- end }}
   {{- end -}}
 
+  {{- end -}}
   {{- end -}}
