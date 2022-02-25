@@ -44,6 +44,10 @@ service:
 ingress:
   enabled: true
 
+  labels: { }
+  annotations:
+    # nginx.ingress.kubernetes.io/use-regex: "true"
+
   ## To use/deploy the Istio VirtualService is required that Istio be deployed on the cluster with at least one Gateway configured
   ## Kubernetes CustomResrouceDefnition "virtualservices.networking.istio.io" should also be present on the cluster
   istio:
@@ -54,9 +58,6 @@ ingress:
   # See https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/#specifying-the-class-of-an-ingress
   # ingressClassName: nginx
 
-  annotations: {}
-  labels: {}
-
   ## With hosts unset the ingress will match all hosts and ips addresses of the related ingress-controller
   # hosts:
   # - address.example.com
@@ -66,7 +67,7 @@ ingress:
   pathType: ImplementationSpecific
 
   ## Extra paths to prepend to every host configuration. This is useful when working with annotation based services.
-  extraPaths: []
+  extraPaths: [ ]
   # - path: /*
   #   backend:
   #     serviceName: example-service
@@ -80,7 +81,7 @@ ingress:
   #       port:
   #         name: example-port
 
-  tls: []
+  tls: [ ]
   # - secretName: chart-example-tls
   #   hosts:
   #     - chart-example.local

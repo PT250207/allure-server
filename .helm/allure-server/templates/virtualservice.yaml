@@ -8,6 +8,17 @@ apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
   name: allure-server
+  labels:
+  {{- include "allure-server.labels" . | nindent 4 }}
+  {{- if .Values.ingress.labels }}
+  {{ toYaml .Values.ingress.labels | indent 4 }}
+  {{- end }}
+  {{- if .Values.ingress.annotations }}
+  annotations:
+    {{- range $key, $value := .Values.ingress.annotations }}
+    {{ $key }}: {{ tpl $value $ | quote }}
+    {{- end }}
+  {{- end }}
 spec:
   hosts: [ "*" ]
   gateways: [ {{ .Values.ingress.istio.gatewayName }} ]
